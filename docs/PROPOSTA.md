@@ -179,3 +179,30 @@ Edge Function `hotmart-webhook` (Deno):
 3. Assinatura **vinculada por e-mail**, com 3 dias de carência em pagamento atrasado.
 4. A4 exportado em **300 dpi** (2480×3508) — arquivos de ~3–6 MB cada.
 5. Nome provisório “OfertaPronta” em toda a UI até você definir o nome final.
+
+## 11. Imagens de produto (estratégia aprovada na conversa)
+
+Objetivo: quase todo produto cadastrado ter foto bonita, recortada e alinhada — sem custo e sem depender do Claude em produção.
+
+**Busca em cascata** (no navegador do cliente, ao digitar o nome ou ler o código de barras):
+
+1. **Banco compartilhado do OfertaPronta** (tabela `imagens_produto` + bucket público): toda imagem aprovada por um cliente fica disponível para todos, indexada por **EAN** e por nome normalizado (busca `pg_trgm`). Efeito de rede: quanto mais clientes, menos buscas externas.
+2. **Open Food Facts** (API pública, gratuita, forte cobertura de produtos brasileiros): busca por EAN (leitura pela câmera do celular com `BarcodeDetector`/ZXing) ou por nome. Imagens CC-BY-SA → crédito discreto “Foto: Open Food Facts” na área de aviso legal.
+3. **Biblioteca genérica curada** (hortifruti, carnes, padaria, granel — itens sem código de barras): ~300 recortes PNG/WebP de bancos com licença livre para uso comercial, já sem fundo, versionados no repositório (`public/biblioteca/`, ~20 MB) e mapeados por sinônimos (“contra filé”, “contrafilé”, “contra-filé”).
+4. **Foto do próprio cliente** (câmera do celular), com o mesmo tratamento automático.
+5. Sem nada encontrado: marcador elegante na cor da marca (a arte nunca quebra).
+
+Quando a imagem externa não permitir CORS, uma **Cloudflare Pages Function** (grátis, 100 mil req/dia) serve como proxy; a primeira cópia é salva no banco compartilhado, então cada imagem externa é baixada uma vez só.
+
+**Tratamento automático (navegador, sem IA paga):**
+
+- Remoção de fundo claro por *flood fill* a partir das bordas com tolerância em OKLab + suavização da borda (resolve a maioria das fotos de embalagem, que vêm em fundo branco).
+- **Recorte justo** pelo contorno (sem margem), centralização e redução para WebP 1000 px.
+- **Normalização de peso visual**: cada imagem guarda proporção e área ocupada; o slot de foto escala garrafas altas e bandejas largas para parecerem do mesmo tamanho, todas apoiadas na mesma linha de chão com sombra de contato.
+- Ajuste manual opcional: arrastar/zoom e “borracha” simples.
+
+**Títulos perfeitos:** normalização do nome (“COCA COLA LT 350ML” → nome “Coca-Cola” + detalhe “lata 350 ml”), dicionário de abreviações do varejo (LT, PCT, CX, FD, UN, KG, GR), e `FitText` que encolhe o texto para caber no número de linhas do modelo — nunca corta nem sobrepõe.
+
+**Precisa do Claude in Chrome?** Não. Tudo roda no app via APIs públicas. Para montar a biblioteca genérica inicial, uso scripts de desenvolvimento (download + recorte em lote), executados uma vez.
+
+Nova ordem das etapas: 3 Marca · 4 Motor de render + modelos de oferta do dia · 5 Supabase · 6 Editor · **7 Imagens de produto** · 8 Demais modelos · 9 Hotmart · 10 Publicação.

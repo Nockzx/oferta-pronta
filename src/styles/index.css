@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Barlow', system-ui, sans-serif;
+  --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --font-preco: 'Anton', Impact, sans-serif;
+  --color-tinta: #18181b;
+  --color-papel: #eceae4;
+  --color-alerta: #e11d48;
+  --color-ouro: #ffd200;
+}
+
+html { -webkit-tap-highlight-color: transparent; }
+body { @apply bg-papel text-tinta font-sans antialiased; }
+
+@utility rotulo {
+  font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--color-zinc-500);
+}

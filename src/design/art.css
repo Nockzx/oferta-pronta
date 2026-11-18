@@ -1,0 +1,147 @@
+/*
+ * Estilos das ARTES. Usam apenas as variáveis de papel de cor:
+ * --p primária · --s secundária · --a destaque · --bg fundo · --tx texto
+ * --onp / --ons / --ona: texto legível sobre primária / secundária / destaque
+ * Medidas em "unidades de arte" (prancheta 1080 de largura).
+ */
+.op-art {
+  --f-preco: 'Anton', Impact, sans-serif;
+  --f-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --f-corpo: 'Barlow', system-ui, sans-serif;
+  --alerta: #e11d48;
+  --sh-adesivo: 0 10px 0 rgba(0, 0, 0, 0.22), 0 22px 40px rgba(0, 0, 0, 0.25);
+  --sh-card: 0 4px 0 rgba(0, 0, 0, 0.08), 0 18px 36px -12px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+  width: 1080px;
+  font-family: var(--f-corpo);
+  color: var(--tx);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+.op-art *,
+.op-art *::before,
+.op-art *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ---------------- PREÇO ---------------- */
+.op-preco {
+  display: inline-flex; align-items: flex-start; line-height: 0.8;
+  color: var(--pc, var(--p)); font-family: var(--f-preco); letter-spacing: -0.01em; white-space: nowrap;
+}
+.op-preco .rs {
+  font: 900 calc(var(--ps) * 0.2) / 1 var(--f-display);
+  background: var(--rsbg, var(--tx)); color: var(--rsc, #fff);
+  padding: calc(var(--ps) * 0.035) calc(var(--ps) * 0.05) calc(var(--ps) * 0.025);
+  border-radius: calc(var(--ps) * 0.04);
+  transform: rotate(-6deg);
+  margin: calc(var(--ps) * 0.1) calc(var(--ps) * 0.04) 0 0;
+}
+.op-preco .int { font-size: var(--ps); }
+.op-preco .dec { display: flex; flex-direction: column; align-items: flex-start; margin-left: calc(var(--ps) * 0.02); }
+.op-preco .cents { font-size: calc(var(--ps) * 0.46); line-height: 0.85; padding-top: calc(var(--ps) * 0.02); }
+.op-preco .cents::before { content: ','; }
+.op-preco .un {
+  font: 800 calc(var(--ps) * 0.13) / 1 var(--f-display); text-transform: uppercase; letter-spacing: 0.02em;
+  margin-top: calc(var(--ps) * 0.06); padding-top: calc(var(--ps) * 0.04);
+  border-top: calc(var(--ps) * 0.018) solid currentColor; white-space: nowrap;
+}
+
+.op-suporte-bloco {
+  display: inline-flex; line-height: 0.8; background: var(--a); --pc: var(--ona); --rsbg: var(--p); --rsc: var(--onp);
+  padding: 0.12em 0.18em 0.13em; border-radius: 18px; box-shadow: var(--sh-adesivo);
+}
+.op-suporte-etiqueta {
+  position: relative; display: inline-flex; line-height: 0.8; background: var(--p); --pc: var(--onp); --rsbg: var(--a); --rsc: var(--ona);
+  padding: 0.12em 0.2em 0.12em 0.45em; clip-path: polygon(14% 0, 100% 0, 100% 100%, 14% 100%, 0 50%);
+}
+.op-suporte-etiqueta::before {
+  content: ''; position: absolute; left: 0.16em; top: 50%; width: 0.12em; height: 0.12em; margin-top: -0.06em;
+  border-radius: 50%; background: var(--bg);
+}
+.op-suporte-explosao { position: relative; display: inline-grid; place-items: center; }
+.op-suporte-explosao > svg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  filter: drop-shadow(0 12px 0 rgba(0, 0, 0, 0.2)) drop-shadow(0 24px 30px rgba(0, 0, 0, 0.25));
+}
+.op-suporte-explosao .op-preco { position: relative; --pc: var(--ona); --rsbg: var(--p); --rsc: var(--onp); }
+.op-suporte-fita {
+  display: inline-flex; line-height: 0.8; background: var(--s); --pc: var(--ons); --rsbg: var(--a); --rsc: var(--ona);
+  padding: 0.1em 0.26em 0.11em; transform: skewX(-10deg); box-shadow: var(--sh-adesivo);
+}
+.op-suporte-fita > * { transform: skewX(10deg); }
+
+.op-antigo { font: 700 var(--os, 30px) / 1 var(--f-display); text-transform: uppercase; color: var(--oc, var(--tx)); white-space: nowrap; }
+.op-antigo s { text-decoration: none; position: relative; font-weight: 800; }
+.op-antigo s::after {
+  content: ''; position: absolute; left: -4%; right: -4%; top: 50%; height: 0.12em;
+  background: var(--alerta); transform: rotate(-10deg); border-radius: 99px;
+}
+
+/* ---------------- SELOS ---------------- */
+.op-tarja {
+  display: inline-block; background: var(--tbg, var(--a)); color: var(--tc, var(--ona));
+  font: italic 900 var(--ts, 56px) / 1 var(--f-display); text-transform: uppercase; letter-spacing: 0.01em;
+  padding: 0.14em 0.5em 0.1em; transform: skewX(-12deg) rotate(-3deg); box-shadow: 0 8px 0 rgba(0, 0, 0, 0.25); white-space: nowrap;
+}
+.op-tarja > span { display: inline-block; transform: skewX(12deg); }
+.op-pilula {
+  display: inline-flex; align-items: center; gap: 0.35em; background: var(--pbg, var(--tx)); color: var(--pcol, var(--bg));
+  font: 800 var(--ts, 28px) / 1 var(--f-display); text-transform: uppercase; letter-spacing: 0.04em;
+  padding: 0.35em 0.8em 0.3em; border-radius: 99px; white-space: nowrap;
+}
+.op-pilula > i { width: 0.55em; height: 0.55em; border-radius: 50%; background: var(--a); display: inline-block; }
+.op-carimbo {
+  display: inline-grid; place-items: center; text-align: center; width: var(--cs, 190px); height: var(--cs, 190px);
+  border-radius: 50%; background: var(--s); color: var(--ons); transform: rotate(-12deg); box-shadow: var(--sh-adesivo);
+  font: 900 calc(var(--cs, 190px) * 0.17) / 0.9 var(--f-display); text-transform: uppercase;
+  outline: calc(var(--cs, 190px) * 0.025) dashed var(--ons); outline-offset: calc(var(--cs, 190px) * -0.075);
+}
+.op-carimbo small { display: block; font-size: 0.55em; font-weight: 800; letter-spacing: 0.04em; }
+.op-canto {
+  position: absolute; top: 46px; right: -88px; width: 360px; text-align: center; transform: rotate(45deg);
+  background: var(--s); color: var(--ons); font: 900 38px / 1 var(--f-display); text-transform: uppercase;
+  padding: 14px 0 12px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3); letter-spacing: 0.05em; z-index: 5;
+}
+
+/* ---------------- FUNDOS ---------------- */
+.op-fundo { position: absolute; inset: 0; }
+.op-fundo-raios {
+  background:
+    radial-gradient(circle at var(--cx, 50%) var(--cy, 46%), color-mix(in oklab, var(--p) 70%, white) 0%, transparent 55%),
+    repeating-conic-gradient(from 0deg at var(--cx, 50%) var(--cy, 46%), var(--p) 0deg 9deg, color-mix(in oklab, var(--p) 86%, black) 9deg 18deg);
+}
+.op-meio-tom {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(color-mix(in oklab, var(--tx) 22%, transparent) 2.2px, transparent 2.6px);
+  background-size: 22px 22px;
+  -webkit-mask-image: linear-gradient(var(--ang, 160deg), #000 0%, transparent 45%);
+  mask-image: linear-gradient(var(--ang, 160deg), #000 0%, transparent 45%);
+}
+
+/* ---------------- MARCA / RODAPÉ ---------------- */
+.op-marca { display: flex; align-items: center; gap: 18px; }
+.op-logo {
+  width: var(--ls, 116px); height: var(--ls, 116px); border-radius: calc(var(--ls, 116px) * 0.24); background: #fff;
+  display: grid; place-items: center; box-shadow: var(--sh-card); flex: none; overflow: hidden;
+}
+.op-logo img { width: 84%; height: 84%; object-fit: contain; }
+.op-logo b { font: 900 calc(var(--ls, 116px) * 0.45) / 1 var(--f-display); color: var(--p); letter-spacing: -0.04em; }
+.op-whats {
+  display: inline-flex; align-items: center; gap: 0.35em; background: #1faf54; color: #fff; white-space: nowrap;
+  padding: 0.42em 0.75em 0.42em 0.55em; border-radius: 99px; font: 800 var(--ws, 32px) / 1 var(--f-display);
+  letter-spacing: 0.02em; box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
+}
+.op-whats svg { width: 1.06em; height: 1.06em; }
+
+/* ---------------- FOTO DE PRODUTO ---------------- */
+.op-foto { position: relative; display: flex; align-items: flex-end; justify-content: center; }
+.op-foto img {
+  max-width: 100%; max-height: 100%; object-fit: contain; object-position: 50% 100%;
+  filter: drop-shadow(0 calc(var(--fh, 400px) * 0.06) calc(var(--fh, 400px) * 0.05) rgba(0, 0, 0, 0.35));
+}
+.op-foto::after {
+  /* "chão": sombra de contato que ancora produtos de alturas diferentes na mesma linha */
+  content: ''; position: absolute; left: 18%; right: 18%; bottom: -2%; height: 6%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.35), transparent); z-index: -1;
+}
