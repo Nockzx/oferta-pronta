@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OfertaPronta · Design System v0 (prévia)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;0,900;1,800;1,900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* =========================================================
+     TOKENS — valores em "unidades de arte" (base 1080 de largura).
+     No app viram src/design/tokens.ts e escalam por formato.
+     ========================================================= */
+  :root {
+    --f-price: 'Anton', 'Impact', sans-serif;          /* números de preço */
+    --f-display: 'Barlow Condensed', sans-serif;       /* títulos, selos, faixas */
+    --f-body: 'Barlow', system-ui, sans-serif;         /* informações, rodapé */
+
+    /* escala tipográfica (razão 1.333 — quarta justa) */
+    --t-xs: 20px; --t-sm: 24px; --t-md: 32px; --t-lg: 42px;
+    --t-xl: 56px; --t-2xl: 75px; --t-3xl: 100px; --t-4xl: 133px;
+    /* escala de preço (independente, pensada p/ leitura a 3 m / no feed) */
+    --p-xs: 64px; --p-sm: 96px; --p-md: 150px; --p-lg: 220px; --p-xl: 320px;
+
+    /* espaçamento — base 8 */
+    --s-1: 8px; --s-2: 16px; --s-3: 24px; --s-4: 32px; --s-6: 48px;
+    --s-8: 64px; --s-12: 96px; --s-16: 128px;
+
+    /* raios e sombras de profundidade */
+    --r-sm: 10px; --r-md: 18px; --r-lg: 32px;
+    --sh-sticker: 0 10px 0 rgba(0,0,0,.22), 0 22px 40px rgba(0,0,0,.25);
+    --sh-card: 0 4px 0 rgba(0,0,0,.08), 0 18px 36px -12px rgba(0,0,0,.35);
+    --sh-product: drop-shadow(0 28px 22px rgba(0,0,0,.35));
+  }
+
+  /* ========== página da prévia (não faz parte das artes) ========== */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--f-body); background: #ECEAE4; color: #18181B; }
+  .page { max-width: 1240px; margin: 0 auto; padding: 48px 28px 96px; }
+  .eyebrow { font: 700 13px/1 var(--f-body); letter-spacing: .16em; text-transform: uppercase; color: #71717A; }
+  h1 { font: 900 64px/0.95 var(--f-display); text-transform: uppercase; margin: 10px 0 12px; letter-spacing: -.01em; }
+  h2 { font: 800 34px/1 var(--f-display); text-transform: uppercase; margin: 64px 0 6px; }
+  .lead { font-size: 18px; max-width: 760px; color: #3F3F46; line-height: 1.5; }
+  .note { font-size: 15px; color: #52525B; max-width: 820px; line-height: 1.5; margin-bottom: 22px; }
+  .panel { background: #fff; border-radius: 20px; padding: 28px; box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 12px 30px -18px rgba(0,0,0,.25); }
+  .row { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+  .label { font: 600 12px/1.3 var(--f-body); color: #71717A; text-transform: uppercase; letter-spacing: .08em; margin-top: 10px; }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; background: #F4F4F5; padding: 2px 6px; border-radius: 6px; }
+
+  .typerow { display: grid; grid-template-columns: 150px 1fr; gap: 18px; align-items: baseline; padding: 12px 0; border-bottom: 1px dashed #E4E4E7; }
+  .typerow:last-child { border: 0; }
+
+  .swatches { display: flex; gap: 10px; flex-wrap: wrap; }
+  .sw { width: 128px; border-radius: 14px; overflow: hidden; background: #fff; box-shadow: inset 0 0 0 1px #E4E4E7; }
+  .sw .c { height: 74px; display: flex; align-items: flex-end; padding: 8px; font: 800 20px/1 var(--f-display); }
+  .sw .m { padding: 8px 10px 10px; font-size: 12px; line-height: 1.35; }
+  .sw .m b { display: block; font-size: 13px; }
+  .ok { color: #15803D; font-weight: 700; }
+  .fix { color: #B45309; font-weight: 700; }
+
+  .spacing .bar { background: #18181B; height: 18px; border-radius: 4px; }
+
+  /* Artboard escalado para prévia: a arte é sempre desenhada em 1080 de largura */
+  .frame { position: relative; overflow: hidden; border-radius: 10px; box-shadow: 0 18px 40px -16px rgba(0,0,0,.45); flex: none; }
+  .frame > .art { transform-origin: 0 0; position: absolute; top: 0; left: 0; }
+
+  /* =========================================================
+     COMPONENTES DE ARTE (viram componentes React em src/design/)
+     Todos usam apenas os papéis de cor:
+     --p primária · --s secundária · --a destaque · --bg fundo · --tx texto
+     --onp texto sobre primária · --ona texto sobre destaque · --ons sobre secundária
+     ========================================================= */
+  .art { width: 1080px; font-family: var(--f-body); color: var(--tx); background: var(--bg); overflow: hidden; position: relative; }
+
+  /* ---------- PREÇO ---------- */
+  .price { display: inline-flex; align-items: flex-start; line-height: .8; color: var(--pc, var(--p)); font-family: var(--f-price); letter-spacing: -.01em; }
+  .price .rs { font: 900 calc(var(--ps) * .2)/1 var(--f-display); background: var(--rsbg, var(--tx)); color: var(--rsc, #fff);
+               padding: calc(var(--ps)*.035) calc(var(--ps)*.05) calc(var(--ps)*.025); border-radius: calc(var(--ps)*.04);
+               transform: rotate(-6deg); margin: calc(var(--ps)*.1) calc(var(--ps)*.04) 0 0; }
+  .price .int { font-size: var(--ps); }
+  .price .dec { display: flex; flex-direction: column; align-items: flex-start; margin-left: calc(var(--ps)*.02); }
+  .price .cents { font-size: calc(var(--ps) * .46); line-height: .85; padding-top: calc(var(--ps)*.02); }
+  .price .cents::before { content: ','; }
+  .price .unit { font: 800 calc(var(--ps)*.13)/1 var(--f-display); text-transform: uppercase; letter-spacing: .02em;
+                 margin-top: calc(var(--ps)*.06); padding-top: calc(var(--ps)*.04); border-top: calc(var(--ps)*.018) solid currentColor; white-space: nowrap; }
+  .old { font: 700 var(--os, 30px)/1 var(--f-display); text-transform: uppercase; color: var(--oc, var(--tx)); opacity: .85; }
+  .old s { text-decoration: none; position: relative; font-weight: 800; }
+  .old s::after { content: ''; position: absolute; left: -4%; right: -4%; top: 50%; height: .12em; background: var(--a2, #E11D48); transform: rotate(-10deg); border-radius: 99px; }
+
+  /* Variações de suporte do preço */
+  .pv-bloco { background: var(--a); --pc: var(--ona); --rsbg: var(--p); --rsc: var(--onp); padding: 18px 26px 20px; border-radius: var(--r-md); box-shadow: var(--sh-sticker); display: inline-block; }
+  .pv-etiqueta { position: relative; background: var(--p); --pc: var(--onp); --rsbg: var(--a); --rsc: var(--ona); padding: 18px 30px 18px 64px; display: inline-block;
+                 clip-path: polygon(14% 0, 100% 0, 100% 100%, 14% 100%, 0 50%); box-shadow: var(--sh-sticker); }
+  .pv-etiqueta::before { content: ''; position: absolute; left: 26px; top: 50%; width: 18px; height: 18px; margin-top: -9px; border-radius: 50%; background: var(--bg); }
+  .pv-burst { position: relative; display: inline-grid; place-items: center; }
+  .pv-burst svg { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 12px 0 rgba(0,0,0,.2)) drop-shadow(0 24px 30px rgba(0,0,0,.25)); }
+  .pv-burst .price { position: relative; --pc: var(--ona); --rsbg: var(--p); --rsc: var(--onp); }
+  .pv-fita { background: var(--s); --pc: var(--ons); --rsbg: var(--a); --rsc: var(--ona); padding: 14px 40px 16px; display: inline-block; transform: skewX(-10deg); box-shadow: var(--sh-sticker); }
+  .pv-fita > * { transform: skewX(10deg); }
+
+  /* ---------- SELOS E FAIXAS ---------- */
+  .tarja { display: inline-block; background: var(--a); color: var(--ona); font: 900 var(--ts, 56px)/1 var(--f-display); text-transform: uppercase; font-style: italic;
+           padding: .14em .5em .1em; transform: skewX(-12deg) rotate(-3deg); box-shadow: 0 8px 0 rgba(0,0,0,.25); letter-spacing: .01em; }
+  .tarja > span { display: inline-block; transform: skewX(12deg); }
+  .pilula { display: inline-flex; align-items: center; gap: .35em; background: var(--tx); color: var(--bg); font: 800 var(--ts, 28px)/1 var(--f-display); text-transform: uppercase;
+            padding: .35em .8em .3em; border-radius: 99px; letter-spacing: .04em; }
+  .pilula i { width: .55em; height: .55em; border-radius: 50%; background: var(--a); display: inline-block; }
+  .carimbo { display: inline-grid; place-items: center; text-align: center; width: var(--cs, 190px); height: var(--cs, 190px); border-radius: 50%;
+             background: var(--s); color: var(--ons); transform: rotate(-12deg); box-shadow: var(--sh-sticker);
+             font: 900 calc(var(--cs,190px)*.17)/.9 var(--f-display); text-transform: uppercase; outline: 5px dashed var(--ons); outline-offset: -14px; }
+  .carimbo small { display: block; font-size: .55em; font-weight: 800; letter-spacing: .04em; }
+  .canto { position: absolute; top: 46px; right: -88px; width: 360px; text-align: center; transform: rotate(45deg); background: var(--s); color: var(--ons);
+           font: 900 38px/1 var(--f-display); text-transform: uppercase; padding: 14px 0 12px; box-shadow: 0 8px 18px rgba(0,0,0,.3); letter-spacing: .05em; z-index: 5; }
+
+  /* ---------- FUNDOS COM PROFUNDIDADE ---------- */
+  .bg-raios { background:
+      radial-gradient(circle at 50% 46%, color-mix(in oklab, var(--p) 70%, white) 0%, transparent 55%),
+      repeating-conic-gradient(from 0deg at 50% 46%, var(--p) 0deg 9deg, color-mix(in oklab, var(--p) 86%, black) 9deg 18deg); }
+  .halftone { position: absolute; inset: 0; pointer-events: none;
+      background-image: radial-gradient(color-mix(in oklab, var(--tx) 22%, transparent) 2.2px, transparent 2.6px); background-size: 22px 22px;
+      -webkit-mask-image: linear-gradient(160deg, #000 0%, transparent 45%); mask-image: linear-gradient(160deg, #000 0%, transparent 45%); }
+
+  .brandbar { display: flex; align-items: center; gap: 18px; }
+  .logo { width: 116px; height: 116px; border-radius: 28px; background: var(--bg); display: grid; place-items: center; box-shadow: var(--sh-card); flex: none; }
+  .logo b { font: 900 52px/1 var(--f-display); color: var(--p); letter-spacing: -.04em; }
+  .bname { font: 800 40px/0.95 var(--f-display); text-transform: uppercase; }
+  .bname small { display: block; font: 600 22px/1.2 var(--f-body); text-transform: none; opacity: .85; margin-top: 6px; }
+
+  .footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; font: 600 24px/1.25 var(--f-body); }
+  .zap { display: inline-flex; align-items: center; gap: 12px; background: #1FAF54; color: #fff; padding: 14px 24px 14px 18px; border-radius: 99px; font: 800 32px/1 var(--f-display); letter-spacing: .02em; box-shadow: 0 6px 0 rgba(0,0,0,.2); white-space: nowrap; }
+  .zap svg { width: 34px; height: 34px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="eyebrow">OfertaPronta · Etapa 1 · para aprovação</div>
+  <h1>Design System v0</h1>
+  <p class="lead">Linguagem de tabloide brasileiro moderno: o preço é o protagonista, a marca do cliente manda nas cores, e toda arte nasce em uma prancheta de 1080 de largura que escala para feed, story e A4. Tudo abaixo é HTML/CSS puro, o mesmo que o navegador vai transformar em PNG.</p>
+
+  <!-- ===================== TIPOGRAFIA ===================== -->
+  <h2>1 · Tipografia</h2>
+  <p class="note">Três famílias do Google Fonts (licença OFL), empacotadas via <code>@fontsource</code> para a renderização não depender de rede. <b>Anton</b> para números de preço, <b>Barlow Condensed</b> (500–900) para títulos e selos, <b>Barlow</b> para informações. Valores em unidades de arte (px na base 1080).</p>
+  <div class="panel">
+    <div class="typerow"><div class="label">Preço XL · 320<br>Anton</div><div style="font:320px/0.8 var(--f-price);">9<span style="font-size:147px;vertical-align:top">,99</span></div></div>
+    <div class="typerow"><div class="label">Display 4XL · 133<br>Condensed 900 itálico</div><div style="font:italic 900 133px/0.9 var(--f-display);text-transform:uppercase">Só hoje</div></div>
+    <div class="typerow"><div class="label">Display 2XL · 75<br>Condensed 800</div><div style="font:800 75px/0.95 var(--f-display);text-transform:uppercase">Promoções da semana</div></div>
+    <div class="typerow"><div class="label">Título LG · 42<br>Condensed 700</div><div style="font:700 42px/1 var(--f-display);text-transform:uppercase">Cerveja Pilsen lata 350ml</div></div>
+    <div class="typerow"><div class="label">Corpo MD · 32<br>Barlow 600</div><div style="font:600 32px/1.25 var(--f-body)">Pedido mínimo R$ 300 · Entrega em 24 h</div></div>
+    <div class="typerow"><div class="label">Legenda XS · 20<br>Barlow 500</div><div style="font:500 20px/1.3 var(--f-body)">Ofertas válidas de 18/11 a 23/11 ou enquanto durarem os estoques. Imagens ilustrativas.</div></div>
+  </div>
+  <p class="note" style="margin-top:14px">Regra de preço: inteiro em Anton; centavos a 46% do tamanho, alinhados ao topo; unidade (<code>CADA</code>, <code>KG</code>, <code>CX C/12</code>, <code>FARDO</code>) em Condensed 800 abaixo dos centavos, separada por um filete. O selo “R$” é um bloco girado −6°, nunca texto solto.</p>
+
+  <!-- ===================== GRID ===================== -->
+  <h2>2 · Grid, formatos e espaçamento</h2>
+  <p class="note">Todos os formatos têm a mesma largura de desenho (1080) — o que muda é a altura. Assim um modelo é escrito uma vez e só reorganiza blocos por formato. A exportação usa <code>pixelRatio</code> para chegar à resolução final.</p>
+  <div class="row">
+    <div class="panel" style="flex:1 1 520px">
+      <table style="width:100%;border-collapse:collapse;font-size:15px;line-height:1.5">
+        <tr style="text-align:left;color:#71717A;font-size:12px;text-transform:uppercase;letter-spacing:.08em"><th>Formato</th><th>Prancheta</th><th>Exporta</th><th>Margem</th><th>Áreas seguras</th></tr>
+        <tr><td><b>Feed</b></td><td>1080×1080</td><td>1080×1080 PNG</td><td>64</td><td>—</td></tr>
+        <tr><td><b>Story</b></td><td>1080×1920</td><td>1080×1920 PNG</td><td>64</td><td>topo 220 · base 300 (UI do Instagram/WhatsApp)</td></tr>
+        <tr><td><b>A4</b></td><td>1080×1527</td><td>2480×3508 PNG → PDF (300 dpi)</td><td>72 (+3 mm sangria opcional)</td><td>—</td></tr>
+      </table>
+      <p class="note" style="margin:16px 0 0">Grid de 12 colunas, calha 24. Grades de produto: <b>6</b> = 3×2 · <b>9</b> = 3×3 · <b>12</b> = 4×3 (feed/A4) ou 3×4 (story).</p>
+    </div>
+    <div class="panel spacing" style="flex:0 1 320px">
+      <div class="label" style="margin:0 0 10px">Espaçamento (base 8)</div>
+      <div class="bar" style="width:8px"></div><div class="label" style="margin:4px 0 8px">s-1 · 8</div>
+      <div class="bar" style="width:16px"></div><div class="label" style="margin:4px 0 8px">s-2 · 16</div>
+      <div class="bar" style="width:24px"></div><div class="label" style="margin:4px 0 8px">s-3 · 24</div>
+      <div class="bar" style="width:32px"></div><div class="label" style="margin:4px 0 8px">s-4 · 32</div>
+      <div class="bar" style="width:48px"></div><div class="label" style="margin:4px 0 8px">s-6 · 48</div>
+      <div class="bar" style="width:64px"></div><div class="label" style="margin:4px 0 8px">s-8 · 64 (margem)</div>
+      <div class="bar" style="width:96px"></div><div class="label" style="margin:4px 0 8px">s-12 · 96</div>
+      <div class="bar" style="width:128px"></div><div class="label" style="margin:4px 0 0">s-16 · 128</div>
+    </div>
+  </div>
+
+  <!-- ===================== CORES ===================== -->
+  <h2>3 · Papéis de cor (gerados da logo)</h2>
+  <p class="note">A logo é reduzida para ~120 px, pixels transparentes / quase brancos / quase pretos são descartados, e um k-means em espaço OKLab encontra os clusters. Os papéis são atribuídos por saturação e área; cada par texto/fundo passa por verificação WCAG AA (4,5:1 texto comum, 3:1 texto grande) e a luminosidade é ajustada automaticamente quando falha. Exemplo com duas marcas fictícias:</p>
+  <div class="panel">
+    <div class="label" style="margin:0 0 10px">Marca A · “Mercado Boa Praça” (vermelho + amarelo)</div>
+    <div class="swatches">
+      <div class="sw"><div class="c" style="background:#D7141A;color:#fff">Aa</div><div class="m"><b>Primária</b>#D7141A<br>texto branco 5,0:1 <span class="ok">AA</span></div></div>
+      <div class="sw"><div class="c" style="background:#0B3D91;color:#fff">Aa</div><div class="m"><b>Secundária</b>#0B3D91<br>texto branco 10,4:1 <span class="ok">AA</span></div></div>
+      <div class="sw"><div class="c" style="background:#FFD200;color:#1A1A1A">Aa</div><div class="m"><b>Destaque</b>#FFD200<br>texto escuro 12,9:1 <span class="ok">AA</span></div></div>
+      <div class="sw"><div class="c" style="background:#FFF8E6;color:#1A1A1A">Aa</div><div class="m"><b>Fundo</b>#FFF8E6<br>derivado da primária</div></div>
+      <div class="sw"><div class="c" style="background:#1A1A1A;color:#fff">Aa</div><div class="m"><b>Texto</b>#1A1A1A<br>16,2:1 no fundo <span class="ok">AA</span></div></div>
+    </div>
+    <div class="label" style="margin:22px 0 10px">Marca B · “Distribuidora Rio Verde” (verde + laranja) — com correção automática</div>
+    <div class="swatches">
+      <div class="sw"><div class="c" style="background:#0F6B3A;color:#fff">Aa</div><div class="m"><b>Primária</b>#0F6B3A<br>texto branco 6,6:1 <span class="ok">AA</span></div></div>
+      <div class="sw"><div class="c" style="background:#F28C00;color:#fff">Aa</div><div class="m"><b>Secundária (original)</b>#F28C00<br>texto branco 2,4:1 <span class="fix">falha</span></div></div>
+      <div class="sw"><div class="c" style="background:#B35F00;color:#fff">Aa</div><div class="m"><b>Secundária (ajustada)</b>#B35F00<br>escurecida em OKLCH → 4,6:1 <span class="ok">AA</span></div></div>
+      <div class="sw"><div class="c" style="background:#FFE14D;color:#10231A">Aa</div><div class="m"><b>Destaque</b>#FFE14D<br>texto escuro 14,1:1 <span class="ok">AA</span></div></div>
+      <div class="sw"><div class="c" style="background:#F2F7F3;color:#10231A">Aa</div><div class="m"><b>Fundo / Texto</b>#F2F7F3 / #10231A<br>15,0:1 <span class="ok">AA</span></div></div>
+    </div>
+    <p class="note" style="margin:16px 0 0">Quando a logo tem uma cor só, o sistema gera secundária (análoga ±30° em matiz) e destaque (amarelo varejo #FFD200 ou complementar, o que contrastar melhor). Ajuste manual sempre disponível; a correção de contraste roda também sobre a escolha manual (com aviso, nunca silenciosa).</p>
+  </div>
+
+  <!-- ===================== PREÇOS ===================== -->
+  <h2>4 · Estilos de preço</h2>
+  <p class="note">Um único componente <code>&lt;Preco&gt;</code> com 5 suportes. Cada modelo escolhe o suporte; a cor vem dos papéis.</p>
+  <div class="panel" style="--p:#D7141A;--s:#0B3D91;--a:#FFD200;--bg:#FFF8E6;--tx:#1A1A1A;--onp:#fff;--ona:#1A1A1A;--ons:#fff;background:#FFF8E6">
+    <div class="row" style="align-items:flex-end;gap:44px">
+      <div>
+        <div class="price" style="--ps:150px"><span class="rs">R$</span><span class="int">4</span><span class="dec"><span class="cents">99</span><span class="unit">cada</span></span></div>
+        <div class="label">Livre · sobre fundo claro</div>
+      </div>
+      <div>
+        <div class="pv-bloco"><div class="price" style="--ps:120px"><span class="rs">R$</span><span class="int">39</span><span class="dec"><span class="cents">90</span><span class="unit">cx c/12</span></span></div></div>
+        <div class="label">Bloco · destaque</div>
+      </div>
+      <div>
+        <div class="pv-etiqueta"><div class="price" style="--ps:110px"><span class="rs">R$</span><span class="int">29</span><span class="dec"><span class="cents">98</span><span class="unit">kg</span></span></div></div>
+        <div class="label">Etiqueta · açougue/hortifruti</div>
+      </div>
+      <div>
+        <div class="pv-burst" style="width:300px;height:300px"><svg viewBox="0 0 200 200" data-burst="20"></svg>
+          <div class="price" style="--ps:96px"><span class="rs">R$</span><span class="int">7</span><span class="dec"><span class="cents">49</span><span class="unit">un</span></span></div></div>
+        <div class="label">Explosão · oferta do dia</div>
+      </div>
+      <div>
+        <div class="pv-fita"><div class="price" style="--ps:100px"><span class="rs">R$</span><span class="int">89</span><span class="dec"><span class="cents">90</span><span class="unit">fardo</span></span></div></div>
+        <div class="label">Fita · B2B</div>
+      </div>
+    </div>
+    <div style="margin-top:30px" class="row">
+      <div class="old" style="--os:34px">De <s>R$ 6,49</s> por</div>
+      <div class="label" style="margin:8px 0 0">Preço antigo · risco diagonal na cor de alerta, nunca cinza apagado</div>
+    </div>
+  </div>
+
+  <!-- ===================== SELOS ===================== -->
+  <h2>5 · Selos e faixas</h2>
+  <div class="panel" style="--p:#0F6B3A;--s:#0F6B3A;--a:#FFE14D;--bg:#F2F7F3;--tx:#10231A;--onp:#fff;--ona:#10231A;--ons:#fff;background:#F2F7F3;position:relative;overflow:hidden;min-height:250px">
+    <div class="row" style="align-items:center;gap:40px">
+      <div><div class="tarja" style="--ts:60px"><span>Só hoje</span></div><div class="label" style="margin-top:22px">Tarja inclinada</div></div>
+      <div><div class="tarja" style="--ts:46px;background:#E11D48;color:#fff"><span>Oferta relâmpago</span></div><div class="label" style="margin-top:22px">Tarja · cor de alerta</div></div>
+      <div><div class="carimbo" style="--cs:170px"><div>Leve 12<small>pague 10</small></div></div><div class="label">Carimbo · condição</div></div>
+      <div><div class="pilula" style="--ts:26px"><i></i>Atacado</div><div class="label">Pílula · categoria</div></div>
+      <div><div class="pilula" style="--ts:26px;background:var(--p);color:#fff"><i></i>Mín. 5 cx</div><div class="label">Pílula · regra B2B</div></div>
+    </div>
+    <div class="canto" style="top:34px;right:-96px;font-size:30px">Novidade</div>
+  </div>
+
+  <!-- ===================== COMPOSIÇÕES ===================== -->
+  <h2>6 · Composições de exemplo</h2>
+  <p class="note">Mesmo sistema, três modelos estruturalmente diferentes. As duas primeiras artes usam o <b>mesmo modelo</b> com as paletas A e B, para mostrar que a marca muda tudo sem quebrar o layout. Produtos são ilustrações vetoriais de exemplo; no app entram as fotos do cliente.</p>
+
+  <div class="row" style="gap:28px;flex-wrap:nowrap">
+    <!-- Oferta do dia — Explosão (Marca A) -->
+    <div>
+      <div class="frame" style="width:400px;height:400px"><div class="art bg-raios" data-scale style="height:1080px;--p:#D7141A;--s:#0B3D91;--a:#FFD200;--bg:#FFF8E6;--tx:#1A1A1A;--onp:#fff;--ona:#1A1A1A;--ons:#fff;color:#fff">
+        <div class="halftone"></div>
+        <div class="canto">Só hoje</div>
+        <div style="position:absolute;left:64px;top:64px" class="brandbar"><div class="logo"><b>BP</b></div><div class="bname">Mercado<br>Boa Praça<small>Oferta do dia · 18/11</small></div></div>
+        <div style="position:absolute;left:64px;top:262px"><div class="tarja" style="--ts:92px"><span>Oferta do dia</span></div></div>
+        <!-- produto -->
+        <svg style="position:absolute;left:150px;top:380px;width:300px;filter:var(--sh-product)" viewBox="0 0 200 260" data-prod="lata"></svg>
+        <div style="position:absolute;left:96px;bottom:212px;font:800 46px/1 var(--f-display);text-transform:uppercase;color:#fff;max-width:440px;text-shadow:0 4px 0 rgba(0,0,0,.25)">Refrigerante cola<br><span style="font-weight:600;font-size:34px;opacity:.9">lata 350 ml</span></div>
+        <div style="position:absolute;right:40px;top:380px">
+          <div class="old" style="--os:40px;color:#fff;text-align:center;margin-bottom:-10px;position:relative;z-index:2;text-shadow:0 3px 0 rgba(0,0,0,.25)">De <s>R$ 4,49</s></div>
+          <div class="pv-burst" style="width:520px;height:520px"><svg viewBox="0 0 200 200" data-burst="22"></svg>
+            <div class="price" style="--ps:200px;margin-top:10px"><span class="rs">R$</span><span class="int">2</span><span class="dec"><span class="cents">99</span><span class="unit">cada</span></span></div></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:150px;background:var(--s);color:#fff;padding:0 64px" class="footer">
+          <div>Rua das Flores, 120 · Centro<br><span style="opacity:.8;font-size:20px">Seg a Sáb 7h–21h · Imagens ilustrativas</span></div>
+          <div class="zap"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3a.4.4 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.5-.3Z"/></svg>(11) 98765-4321</div>
+        </div>
+      </div></div>
+      <div class="label">Oferta do dia · “Explosão” · feed · Marca A</div>
+    </div>
+
+    <!-- mesmo modelo, Marca B -->
+    <div>
+      <div class="frame" style="width:400px;height:400px"><div class="art bg-raios" data-scale style="height:1080px;--p:#0F6B3A;--s:#B35F00;--a:#FFE14D;--bg:#F2F7F3;--tx:#10231A;--onp:#fff;--ona:#10231A;--ons:#fff;color:#fff">
+        <div class="halftone"></div>
+        <div class="canto">Só hoje</div>
+        <div style="position:absolute;left:64px;top:64px" class="brandbar"><div class="logo"><b>RV</b></div><div class="bname">Distribuidora<br>Rio Verde<small>Oferta do dia · 18/11</small></div></div>
+        <div style="position:absolute;left:64px;top:262px"><div class="tarja" style="--ts:92px"><span>Oferta do dia</span></div></div>
+        <svg style="position:absolute;left:160px;top:370px;width:270px;filter:var(--sh-product)" viewBox="0 0 200 280" data-prod="garrafa"></svg>
+        <div style="position:absolute;left:96px;bottom:212px;font:800 46px/1 var(--f-display);text-transform:uppercase;color:#fff;max-width:440px;text-shadow:0 4px 0 rgba(0,0,0,.25)">Água mineral<br><span style="font-weight:600;font-size:34px;opacity:.9">fardo 6×1,5 L</span></div>
+        <div style="position:absolute;right:40px;top:380px">
+          <div class="old" style="--os:40px;color:#fff;text-align:center;margin-bottom:-10px;position:relative;z-index:2;text-shadow:0 3px 0 rgba(0,0,0,.25)">De <s>R$ 15,90</s></div>
+          <div class="pv-burst" style="width:520px;height:520px"><svg viewBox="0 0 200 200" data-burst="22"></svg>
+            <div class="price" style="--ps:180px;margin-top:10px"><span class="rs">R$</span><span class="int">11</span><span class="dec"><span class="cents">90</span><span class="unit">fardo</span></span></div></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:150px;background:var(--s);color:#fff;padding:0 64px" class="footer">
+          <div>Av. Industrial, 2.400 · Galpão 3<br><span style="opacity:.8;font-size:20px">Seg a Sex 7h–18h · Sáb 7h–12h</span></div>
+          <div class="zap"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm4.5 12.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3a.4.4 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.5-.3Z"/></svg>(62) 99123-4567</div>
+        </div>
+      </div></div>
+      <div class="label">Mesmo modelo · Marca B (secundária já corrigida)</div>
+    </div>
+
+    <!-- Story relâmpago -->
+    <div>
+      <div class="frame" style="width:225px;height:400px"><div class="art" data-scale style="height:1920px;--p:#D7141A;--s:#0B3D91;--a:#FFD200;--bg:#FFF8E6;--tx:#1A1A1A;--onp:#fff;--ona:#1A1A1A;--ons:#fff">
+        <div style="position:absolute;inset:0;background:var(--s)"></div>
+        <div style="position:absolute;left:-200px;right:-200px;top:780px;height:900px;background:var(--p);transform:rotate(-12deg);box-shadow:0 -30px 0 var(--a)"></div>
+        <div class="halftone" style="-webkit-mask-image:linear-gradient(200deg,#000,transparent 40%);mask-image:linear-gradient(200deg,#000,transparent 40%)"></div>
+        <!-- áreas seguras -->
+        <div style="position:absolute;left:0;right:0;top:0;height:220px;background:repeating-linear-gradient(45deg,rgba(255,255,255,.10) 0 14px,transparent 14px 28px);border-bottom:3px dashed rgba(255,255,255,.5)"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:300px;background:repeating-linear-gradient(45deg,rgba(255,255,255,.10) 0 14px,transparent 14px 28px);border-top:3px dashed rgba(255,255,255,.5)"></div>
+        <div style="position:absolute;left:64px;top:260px;color:#fff" class="brandbar"><div class="logo"><b>BP</b></div><div class="bname">Mercado<br>Boa Praça</div></div>
+        <div style="position:absolute;left:40px;top:450px"><div class="tarja" style="--ts:120px;background:#E11D48;color:#fff"><span>⚡ Relâmpago</span></div></div>
+        <div style="position:absolute;left:64px;top:640px;font:800 64px/1 var(--f-display);color:#fff;text-transform:uppercase">Só até as 18h</div>
+        <svg style="position:absolute;left:290px;top:720px;width:500px;filter:var(--sh-product)" viewBox="0 0 200 260" data-prod="caixa"></svg>
+        <div style="position:absolute;left:64px;top:1420px;font:800 54px/1 var(--f-display);color:#fff;text-transform:uppercase">Leite integral<br><span style="font-size:38px;font-weight:600;opacity:.9">caixa c/ 12 × 1 L</span></div>
+        <div style="position:absolute;right:56px;top:1350px"><div class="pv-bloco" style="transform:rotate(-4deg)"><div class="price" style="--ps:190px"><span class="rs">R$</span><span class="int">54</span><span class="dec"><span class="cents">90</span><span class="unit">a caixa</span></span></div></div></div>
+        <div style="position:absolute;left:64px;right:64px;top:1592px;display:flex;justify-content:center"><div class="zap" style="font-size:44px;padding:20px 36px"><svg viewBox="0 0 24 24" fill="currentColor" style="width:46px;height:46px"><circle cx="12" cy="12" r="10"/></svg>Peça pelo WhatsApp</div></div>
+      </div></div>
+      <div class="label">Story · “Relâmpago” · áreas seguras hachuradas</div>
+    </div>
+  </div>
+
+  <div class="row" style="gap:28px;margin-top:28px">
+    <!-- Grade atacado 6 -->
+    <div>
+      <div class="frame" style="width:540px;height:540px"><div class="art" data-scale style="height:1080px;--p:#0F6B3A;--s:#B35F00;--a:#FFE14D;--bg:#F2F7F3;--tx:#10231A;--onp:#fff;--ona:#10231A;--ons:#fff">
+        <div style="position:absolute;left:0;right:0;top:0;height:250px;background:var(--p);clip-path:polygon(0 0,100% 0,100% 78%,0 100%)"></div>
+        <div style="position:absolute;left:64px;top:52px;color:#fff" class="brandbar"><div class="logo" style="width:100px;height:100px"><b style="font-size:44px">RV</b></div>
+          <div><div style="font:900 70px/0.9 var(--f-display);text-transform:uppercase">Tabela atacado</div><div style="font:600 26px/1.2 var(--f-body);opacity:.9;margin-top:8px">Distribuidora Rio Verde · válida 18/11 a 23/11</div></div></div>
+        <div class="pilula" style="position:absolute;right:64px;top:70px;--ts:24px;background:var(--a);color:var(--ona)"><i style="background:var(--p)"></i>Semana 47</div>
+        <div style="position:absolute;left:64px;right:64px;top:240px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+          <!-- cards gerados por JS -->
+          <div data-cards></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:126px;background:var(--tx);color:#fff;padding:0 64px" class="footer">
+          <div style="font-size:22px;line-height:1.35"><b style="font:800 28px/1 var(--f-display);text-transform:uppercase;color:var(--a)">Pedido mín. R$ 300</b><br>PIX · Boleto 14 dias · Entrega em 24 h</div>
+          <div class="zap" style="font-size:30px"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>(62) 99123-4567</div>
+        </div>
+      </div></div>
+      <div class="label">Tabela da distribuidora · “Grade 6” · preço por caixa + unidade</div>
+    </div>
+
+    <div class="panel" style="flex:1 1 320px;align-self:stretch">
+      <div class="label" style="margin:0 0 8px">Princípios que todo modelo segue</div>
+      <ol style="padding-left:20px;font-size:15px;line-height:1.6;color:#3F3F46">
+        <li><b>Hierarquia de 3 níveis:</b> preço → produto → marca/contato. Nada compete com o preço.</li>
+        <li><b>Profundidade com 3 camadas:</b> fundo com textura (raios, meio-tom, diagonais) → produto com sombra projetada → selos “adesivo” com sombra dura.</li>
+        <li><b>Diagonais e rotações controladas:</b> −3° a −12°, sempre na mesma direção dentro da arte.</li>
+        <li><b>Texto nunca sobre foto sem suporte:</b> faixa, bloco ou sombra.</li>
+        <li><b>B2B mostra a conta pronta:</b> preço da caixa grande, “un. sai a R$ x” pequeno, quantidade mínima visível.</li>
+        <li><b>Cor de alerta fixa</b> (#E11D48) só para urgência e risco de preço antigo; não depende da marca.</li>
+        <li><b>Texto longo encolhe sozinho</b> (fit-text com limite mínimo) em vez de quebrar o layout.</li>
+        <li><b>Rodapé padronizado:</b> WhatsApp em pílula verde, endereço, horário e aviso legal (“imagens ilustrativas”).</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---- starburst (vira util em src/design/shapes.ts) ----
+  function burst(points, r1 = 98, r2 = 82) {
+    const pts = [];
+    for (let i = 0; i < points * 2; i++) {
+      const r = i % 2 ? r2 : r1, a = (Math.PI * i) / points - Math.PI / 2;
+      pts.push((100 + r * Math.cos(a)).toFixed(1) + ',' + (100 + r * Math.sin(a)).toFixed(1));
+    }
+    return pts.join(' ');
+  }
+  document.querySelectorAll('svg[data-burst]').forEach(s => {
+    s.innerHTML = `<polygon points="${burst(+s.dataset.burst)}" fill="var(--a)"/>
+                   <polygon points="${burst(+s.dataset.burst, 86, 72)}" fill="none" stroke="var(--ona)" stroke-opacity=".18" stroke-width="1.6" stroke-dasharray="4 3"/>`;
+  });
+
+  // ---- ilustrações de produto de exemplo (no app: fotos do cliente) ----
+  const prod = {
+    lata: `<defs><linearGradient id="lg1" x1="0" x2="1"><stop offset="0" stop-color="#7a0a0d"/><stop offset=".35" stop-color="#e4252b"/><stop offset=".55" stop-color="#ff6a6e"/><stop offset=".75" stop-color="#c5161b"/><stop offset="1" stop-color="#6a080b"/></linearGradient>
+           <linearGradient id="lg2" x1="0" x2="1"><stop offset="0" stop-color="#8a8f96"/><stop offset=".5" stop-color="#f1f3f5"/><stop offset="1" stop-color="#7d828a"/></linearGradient></defs>
+           <ellipse cx="100" cy="250" rx="62" ry="8" fill="rgba(0,0,0,.25)"/>
+           <path d="M42 34 Q42 22 56 20 H144 Q158 22 158 34 V226 Q158 240 144 242 H56 Q42 240 42 226Z" fill="url(#lg1)"/>
+           <path d="M48 12 H152 L158 34 H42Z" fill="url(#lg2)"/><rect x="42" y="226" width="116" height="16" rx="6" fill="url(#lg2)"/>
+           <path d="M42 110 C80 90 120 150 158 120 V150 C120 180 80 120 42 140Z" fill="#fff" opacity=".92"/>
+           <text x="100" y="92" font-family="Anton" font-size="34" fill="#fff" text-anchor="middle">COLA</text>`,
+    garrafa: `<defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#5fb4e6" stop-opacity=".8"/><stop offset=".45" stop-color="#e8f6ff"/><stop offset="1" stop-color="#3a8fc4" stop-opacity=".85"/></linearGradient></defs>
+           <ellipse cx="100" cy="272" rx="58" ry="7" fill="rgba(0,0,0,.25)"/>
+           <rect x="84" y="4" width="32" height="22" rx="4" fill="#1d6fb0"/>
+           <path d="M86 26 H114 Q116 60 148 86 Q156 94 156 110 V250 Q156 268 138 268 H62 Q44 268 44 250 V110 Q44 94 52 86 Q84 60 86 26Z" fill="url(#g1)"/>
+           <rect x="44" y="140" width="112" height="70" fill="#0F6B3A"/><text x="100" y="186" font-family="Anton" font-size="30" fill="#fff" text-anchor="middle">ÁGUA</text>
+           <path d="M60 110 Q62 200 60 250" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".6" fill="none"/>`,
+    caixa: `<ellipse cx="100" cy="252" rx="80" ry="8" fill="rgba(0,0,0,.3)"/>
+           <path d="M30 60 L100 30 L170 60 L100 90Z" fill="#f4f4f4"/><path d="M30 60 L100 90 V250 L30 220Z" fill="#dfe6ee"/><path d="M170 60 L100 90 V250 L170 220Z" fill="#c7d2de"/>
+           <path d="M30 120 L100 150 V200 L30 170Z" fill="#0B3D91"/><path d="M170 120 L100 150 V200 L170 170Z" fill="#082c6a"/>
+           <text x="62" y="168" font-family="Anton" font-size="20" fill="#fff" transform="skewY(23) translate(0,-50)">LEITE</text>`
+  };
+  document.querySelectorAll('svg[data-prod]').forEach(s => s.innerHTML = prod[s.dataset.prod]);
+
+  // ---- cards da grade atacado ----
+  const items = [
+    ['Cerveja Pilsen', 'lata 350 ml', 'cx c/12', '39', '90', '3,33', 'lata'],
+    ['Refrigerante cola', 'pet 2 L', 'fardo c/6', '41', '40', '6,90', 'garrafa'],
+    ['Água mineral', '1,5 L', 'fardo c/6', '11', '90', '1,98', 'garrafa'],
+    ['Leite integral', '1 L', 'cx c/12', '54', '90', '4,58', 'caixa'],
+    ['Energético', 'lata 250 ml', 'cx c/24', '119', '00', '4,96', 'lata'],
+    ['Suco de uva', '1 L', 'cx c/6', '47', '40', '7,90', 'caixa'],
+  ];
+  const host = document.querySelector('[data-cards]');
+  const grid = host.parentElement; host.remove();
+  items.forEach(([n, v, emb, i, c, un, p], idx) => {
+    const el = document.createElement('div');
+    el.style.cssText = 'background:#fff;border-radius:22px;box-shadow:var(--sh-card);height:332px;position:relative;overflow:hidden;padding:18px 20px';
+    el.innerHTML = `
+      ${idx === 0 ? '<div class="carimbo" style="--cs:120px;position:absolute;right:-6px;top:-4px;z-index:3;outline-width:3px;outline-offset:-9px"><div>Leve 12<small>pague 10</small></div></div>' : ''}
+      <div style="height:128px;display:flex;justify-content:center;align-items:flex-end"><svg viewBox="0 0 200 ${p==='garrafa'?280:260}" style="height:128px;filter:drop-shadow(0 10px 8px rgba(0,0,0,.25))">${prod[p]}</svg></div>
+      <div style="font:800 28px/1 var(--f-display);text-transform:uppercase;margin-top:10px">${n}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+        <span style="font:600 19px/1 var(--f-body);opacity:.75">${v}</span>
+        <span class="pilula" style="--ts:17px;background:var(--p);color:#fff;padding:.35em .6em .3em">${emb}</span></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;background:var(--a);padding:10px 20px 12px;display:flex;align-items:flex-end;justify-content:space-between">
+        <div class="price" style="--ps:${i.length > 2 ? 76 : 86}px;--pc:var(--ona);--rsbg:var(--p)"><span class="rs">R$</span><span class="int">${i}</span><span class="dec"><span class="cents">${c}</span></span></div>
+        <div style="font:700 17px/1.1 var(--f-display);text-transform:uppercase;text-align:right;color:var(--ona)">un. sai a<br><b style="font:400 30px/1 var(--f-price)">R$ ${un}</b></div>
+      </div>`;
+    grid.appendChild(el);
+  });
+
+  // ---- escala das pranchetas para caber na prévia ----
+  document.querySelectorAll('[data-scale]').forEach(a => {
+    a.style.transform = `scale(${a.parentElement.clientWidth / 1080})`;
+  });
+</script>
+</body>
+</html>
