@@ -3,17 +3,18 @@ import { clsx } from 'clsx'
 
 export function Layout() {
   const link = ({ isActive }: { isActive: boolean }) =>
-    clsx('px-3 py-2 rounded-full text-sm font-semibold transition', isActive ? 'bg-tinta text-white' : 'text-zinc-600 hover:bg-zinc-200')
+    clsx('whitespace-nowrap px-3 py-2 rounded-full text-sm font-semibold transition', isActive ? 'bg-tinta text-white' : 'text-zinc-600 hover:bg-zinc-200')
   return (
     <div className="min-h-dvh">
       <header className="sticky top-0 z-20 border-b border-black/5 bg-papel/85 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <NavLink to="/" className="flex items-center gap-2">
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-alerta font-preco text-lg text-ouro">R$</span>
-            <span className="font-display text-xl font-black uppercase tracking-tight">OfertaPronta</span>
+            <span className="hidden font-display text-xl font-black uppercase tracking-tight sm:inline">OfertaPronta</span>
           </NavLink>
           <nav className="flex gap-1">
-            <NavLink to="/design-system" className={link}>Design system</NavLink>
+            <NavLink to="/marca" className={link}>Minha marca</NavLink>
+            <NavLink to="/design-system" className={link}>Design<span className="hidden sm:inline"> system</span></NavLink>
           </nav>
         </div>
       </header>

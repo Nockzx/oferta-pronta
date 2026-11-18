@@ -5,6 +5,8 @@ import { paletaParaVars } from '@/brand/vars'
 import { MARCA_DISTRIBUIDORA, MARCA_MERCADO, PRODUTOS_AMOSTRA } from '@/lib/amostras'
 import { TEMPLATES } from '@/templates/registry'
 import { camposPadrao, type ItemOferta } from '@/templates/types'
+import { useMarcaAtual } from '@/brand/store'
+import type { Marca } from '@/brand/types'
 import '@/design/art.css'
 
 const MARCAS = [MARCA_MERCADO, MARCA_DISTRIBUIDORA]
@@ -17,7 +19,9 @@ export function DesignSystemPage() {
   const [produtoIdx, setProdutoIdx] = useState(0)
   const [nomeLongo, setNomeLongo] = useState(false)
 
-  const marca = MARCAS[marcaIdx]
+  const minhaMarca = useMarcaAtual()
+  const marcas = [...MARCAS, minhaMarca]
+  const marca = marcas[marcaIdx]
   const t = TEMPLATES[0]
   const item = { ...PRODUTOS_AMOSTRA[produtoIdx], ...(nomeLongo ? NOME_LONGO : {}) }
 
@@ -35,10 +39,10 @@ export function DesignSystemPage() {
         <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
           <div className="space-y-5 rounded-2xl bg-white p-5 shadow-sm">
             <Grupo rotulo="Marca">
-              {MARCAS.map((m, i) => (
-                <Chip key={m.nome} ativo={i === marcaIdx} onClick={() => setMarcaIdx(i)}>
+              {marcas.map((m, i) => (
+                <Chip key={i} ativo={i === marcaIdx} onClick={() => setMarcaIdx(i)}>
                   <span className="mr-1.5 inline-block h-3 w-3 rounded-full align-middle" style={{ background: m.paleta.primaria }} />
-                  {m.nome}
+                  {i === MARCAS.length ? 'Minha marca' : m.nome}
                 </Chip>
               ))}
             </Grupo>
@@ -164,7 +168,7 @@ function Chip({ ativo, onClick, children }: { ativo: boolean; onClick: () => voi
 }
 
 /** Área com as variáveis de cor da marca, para exibir componentes de arte fora de uma prancheta. */
-function Palco({ marca, children }: { marca: (typeof MARCAS)[number]; children: ReactNode }) {
+function Palco({ marca, children }: { marca: Marca; children: ReactNode }) {
   return (
     <div className="overflow-x-auto rounded-2xl shadow-sm">
       <div className="op-art !w-auto min-w-[900px] p-10" style={paletaParaVars(marca.paleta)}>{children}</div>

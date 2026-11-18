@@ -27,7 +27,7 @@
 /* ---------------- PREÇO ---------------- */
 .op-preco {
   display: inline-flex; align-items: flex-start; line-height: 0.8;
-  color: var(--pc, var(--p)); font-family: var(--f-preco); letter-spacing: -0.01em; white-space: nowrap;
+  color: var(--pc, var(--pf, var(--p))); font-family: var(--f-preco); letter-spacing: -0.01em; white-space: nowrap;
 }
 .op-preco .rs {
   font: 900 calc(var(--ps) * 0.2) / 1 var(--f-display);
@@ -122,11 +122,12 @@
 /* ---------------- MARCA / RODAPÉ ---------------- */
 .op-marca { display: flex; align-items: center; gap: 18px; }
 .op-logo {
-  width: var(--ls, 116px); height: var(--ls, 116px); border-radius: calc(var(--ls, 116px) * 0.24); background: #fff;
+  /* altura fixa; largura acompanha a logo (quadrada ou horizontal, até 2,4× a altura) */
+  min-width: var(--ls, 116px); width: auto; height: var(--ls, 116px); padding: 0 calc(var(--ls, 116px) * 0.1); border-radius: calc(var(--ls, 116px) * 0.24); background: #fff;
   display: grid; place-items: center; box-shadow: var(--sh-card); flex: none; overflow: hidden;
 }
-.op-logo img { width: 84%; height: 84%; object-fit: contain; }
-.op-logo b { font: 900 calc(var(--ls, 116px) * 0.45) / 1 var(--f-display); color: var(--p); letter-spacing: -0.04em; }
+.op-logo img { height: calc(var(--ls, 116px) * 0.8); width: auto; max-width: calc(var(--ls, 116px) * 2.2); object-fit: contain; }
+.op-logo b { font: 900 calc(var(--ls, 116px) * 0.45) / 1 var(--f-display); color: var(--pf, var(--p)); letter-spacing: -0.04em; }
 .op-whats {
   display: inline-flex; align-items: center; gap: 0.35em; background: #1faf54; color: #fff; white-space: nowrap;
   padding: 0.42em 0.75em 0.42em 0.55em; border-radius: 99px; font: 800 var(--ws, 32px) / 1 var(--f-display);

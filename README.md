@@ -13,6 +13,7 @@ Requer Node 20+.
 npm install
 npm run dev        # http://localhost:5173  →  /design-system
 npm run build      # checa tipos e gera dist/
+npm test           # testes (cores, contraste, paleta)
 ```
 
 ## Estrutura
@@ -21,7 +22,7 @@ npm run build      # checa tipos e gera dist/
 src/
   design/      design system das artes (tokens, Artboard, Preco, Selos, FitText, FotoProduto…)
   templates/   um modelo por pasta: manifest.json + index.tsx (registro automático)
-  brand/       tipos de marca e papéis de cor
+  brand/       marca: extração de cores da logo (k-means OKLab), papéis de cor, contraste WCAG, estado
   pages/       telas do app
   lib/         utilidades (formatação BRL, telefone, dados de amostra)
 ```
